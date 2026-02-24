@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { Layout } from "../components/Layout";
-import { DollarSign, Search, Calendar, CheckCircle2, AlertCircle, ArrowUpRight } from "lucide-react";
+import { DollarSign, Search, Calendar, CheckCircle2, AlertCircle, ArrowUpRight, Download } from "lucide-react";
 
 export const Receivables: React.FC = () => {
     const [receivables, setReceivables] = useState([]);
@@ -55,6 +55,43 @@ export const Receivables: React.FC = () => {
         }
     }
 
+    function handleExportCSV() {
+        if (filteredReceivables.length === 0) {
+            alert("Não há dados para exportar com os filtros atuais.");
+            return;
+        }
+
+        // CSV Header
+        const headers = ["Cliente", "Valor", "Data do Pedido", "Vencimento", "Status", "Data do Pagamento"];
+
+        // CSV Rows
+        const rows = filteredReceivables.map((r: any) => [
+            r.order?.client?.name || "N/A",
+            Number(r.amount).toFixed(2),
+            new Date(r.order?.created_at || r.created_at).toLocaleDateString('pt-BR'),
+            new Date(r.due_date).toLocaleDateString('pt-BR'),
+            r.status === 'paid' ? "Liquidado" : "Aguardando",
+            r.paid_at ? new Date(r.paid_at).toLocaleDateString('pt-BR') : ""
+        ]);
+
+        // Build CSV String (using semicolon for better compatibility with Excel BR)
+        const csvContent = [
+            headers.join(";"),
+            ...rows.map(row => row.join(";"))
+        ].join("\n");
+
+        // Create Blob and trigger download
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `financeiro_${filterDate || 'geral'}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     return (
         <Layout>
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
@@ -63,6 +100,19 @@ export const Receivables: React.FC = () => {
                     <p className="text-slate-500 mt-1">Acompanhe suas contas a receber e recebimentos.</p>
                 </div>
                 <div className="flex flex-col md:flex-row items-center gap-4">
+                    <button
+                        onClick={handleExportCSV}
+                        className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3 hover:bg-slate-50 transition-colors group"
+                    >
+                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <Download size={20} />
+                        </div>
+                        <div className="text-left">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Exportar</div>
+                            <div className="text-sm font-bold text-slate-900 leading-none">Planilha</div>
+                        </div>
+                    </button>
+
                     <div className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
                         <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
                             <Calendar size={20} />
