@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { Layout } from "../components/Layout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Users, Box, ShoppingCart } from "lucide-react";
 
 export const Dashboard: React.FC = () => {
@@ -38,7 +38,10 @@ export const Dashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Stats Cards */}
-                <div className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 relative overflow-hidden">
+                <Link
+                    to="/clients"
+                    className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 relative overflow-hidden block"
+                >
                     <div className="absolute top-0 right-0 p-4 bg-indigo-50 rounded-bl-3xl group-hover:bg-indigo-600 transition-colors duration-300">
                         <Users size={24} className="text-indigo-600 group-hover:text-white" />
                     </div>
@@ -47,9 +50,12 @@ export const Dashboard: React.FC = () => {
                     <div className="mt-4 flex items-center text-sm text-green-600 font-medium">
                         <span>Base de dados ativa</span>
                     </div>
-                </div>
+                </Link>
 
-                <div className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 relative overflow-hidden">
+                <Link
+                    to="/products"
+                    className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 relative overflow-hidden block"
+                >
                     <div className="absolute top-0 right-0 p-4 bg-emerald-50 rounded-bl-3xl group-hover:bg-emerald-600 transition-colors duration-300">
                         <Box size={24} className="text-emerald-600 group-hover:text-white" />
                     </div>
@@ -58,9 +64,12 @@ export const Dashboard: React.FC = () => {
                     <div className="mt-4 flex items-center text-sm text-emerald-600 font-medium">
                         <span>Produtos cadastrados</span>
                     </div>
-                </div>
+                </Link>
 
-                <div className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 relative overflow-hidden">
+                <Link
+                    to="/orders"
+                    className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 relative overflow-hidden block"
+                >
                     <div className="absolute top-0 right-0 p-4 bg-amber-50 rounded-bl-3xl group-hover:bg-amber-600 transition-colors duration-300">
                         <ShoppingCart size={24} className="text-amber-600 group-hover:text-white" />
                     </div>
@@ -69,7 +78,7 @@ export const Dashboard: React.FC = () => {
                     <div className="mt-4 flex items-center text-sm text-amber-600 font-medium">
                         <span>Histórico de pedidos</span>
                     </div>
-                </div>
+                </Link>
             </div>
 
             {/* Quick Actions / Info Section */}

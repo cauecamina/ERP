@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { Layout } from "../components/Layout";
-import { PackagePlus, BarChart3, Search, MoreVertical, Package } from "lucide-react";
+import { PackagePlus, BarChart3, Search, MoreVertical, Package, Edit2, Trash2, X } from "lucide-react";
 
 export const Products: React.FC = () => {
     const [products, setProducts] = useState([]);
     const [formData, setFormData] = useState({ name: "", price: 0, stock: 0 });
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
     useEffect(() => {
         loadProducts();
@@ -18,9 +20,43 @@ export const Products: React.FC = () => {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        await api.post("/products", formData);
+        try {
+            if (editingId) {
+                await api.put(`/products/${editingId}`, formData);
+                setEditingId(null);
+            } else {
+                await api.post("/products", formData);
+            }
+            setFormData({ name: "", price: 0, stock: 0 });
+            loadProducts();
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao salvar produto.");
+        }
+    }
+
+    async function handleDelete(id: string) {
+        if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+        try {
+            await api.delete(`/products/${id}`);
+            loadProducts();
+            setActiveMenuId(null);
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao excluir produto.");
+        }
+    }
+
+    function handleEdit(p: any) {
+        setFormData({ name: p.name, price: Number(p.price), stock: Number(p.stock) });
+        setEditingId(p.id);
+        setActiveMenuId(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelEdit() {
+        setEditingId(null);
         setFormData({ name: "", price: 0, stock: 0 });
-        loadProducts();
     }
 
     return (
@@ -48,7 +84,17 @@ export const Products: React.FC = () => {
                             <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
                                 <PackagePlus size={20} />
                             </div>
-                            <h2 className="text-lg font-bold text-slate-900">Novo Produto</h2>
+                            <h2 className="text-lg font-bold text-slate-900">
+                                {editingId ? "Editar Produto" : "Novo Produto"}
+                            </h2>
+                            {editingId && (
+                                <button
+                                    onClick={cancelEdit}
+                                    className="ml-auto p-1 hover:bg-slate-100 rounded-full text-slate-400"
+                                >
+                                    <X size={18} />
+                                </button>
+                            )}
                         </div>
 
                         <div className="space-y-5">
@@ -92,8 +138,8 @@ export const Products: React.FC = () => {
                                 </div>
                             </div>
 
-                            <button className="w-full bg-emerald-600 text-white p-5 rounded-2xl font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all duration-200 mt-4">
-                                Adicionar ao Estoque
+                            <button className={`w-full text-white p-5 rounded-2xl font-bold shadow-lg transition-all duration-200 mt-4 ${editingId ? 'bg-indigo-600 shadow-indigo-600/20 hover:bg-indigo-700' : 'bg-emerald-600 shadow-emerald-600/20 hover:bg-emerald-700'}`}>
+                                {editingId ? "Salvar Alterações" : "Adicionar ao Estoque"}
                             </button>
                         </div>
                     </form>
@@ -101,7 +147,7 @@ export const Products: React.FC = () => {
 
                 {/* Table Column */}
                 <div className="xl:col-span-2">
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-visible">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b border-slate-100 italic">
@@ -138,10 +184,35 @@ export const Products: React.FC = () => {
                                                     {p.stock} em estoque
                                                 </span>
                                             </td>
-                                            <td className="p-6 text-right">
-                                                <button className="p-2 text-slate-400 hover:text-emerald-600 transition-colors">
+                                            <td className="p-6 text-right relative">
+                                                <button
+                                                    onClick={() => setActiveMenuId(activeMenuId === p.id ? null : p.id)}
+                                                    className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"
+                                                >
                                                     <MoreVertical size={20} />
                                                 </button>
+
+                                                {activeMenuId === p.id && (
+                                                    <>
+                                                        <div className="fixed inset-0 z-10" onClick={() => setActiveMenuId(null)}></div>
+                                                        <div className="absolute right-6 top-14 bg-white border border-slate-100 shadow-2xl rounded-2xl py-2 w-48 z-20 animate-in fade-in zoom-in duration-200">
+                                                            <button
+                                                                onClick={() => handleEdit(p)}
+                                                                className="w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-all"
+                                                            >
+                                                                <Edit2 size={16} />
+                                                                <span>Editar Produto</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(p.id)}
+                                                                className="w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                                <span>Excluir Permanentemente</span>
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </td>
                                         </tr>
                                     ))
