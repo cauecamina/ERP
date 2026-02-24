@@ -16,6 +16,7 @@ export class AccountReceivableService {
         if (!receivable) throw new CustomError("Receivable not found", 404);
 
         receivable.status = "paid";
+        receivable.paid_at = new Date();
         await accountReceivableRepository.save(receivable);
 
         // Sync with order
