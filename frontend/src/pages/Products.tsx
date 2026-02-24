@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { Layout } from "../components/Layout";
+import { PackagePlus, BarChart3, Search, MoreVertical, Package } from "lucide-react";
 
 export const Products: React.FC = () => {
     const [products, setProducts] = useState([]);
@@ -24,55 +25,131 @@ export const Products: React.FC = () => {
 
     return (
         <Layout>
-            <h1 className="text-3xl font-bold mb-8">Produtos</h1>
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+                <div>
+                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Catálogo de Produtos</h1>
+                    <p className="text-slate-500 mt-1">Gerencie seu inventário e preços.</p>
+                </div>
+                <div className="relative">
+                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                        type="text"
+                        placeholder="Pesquisar produtos..."
+                        className="pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl w-full md:w-80 shadow-sm focus:ring-2 focus:ring-emerald-600 outline-none transition-all"
+                    />
+                </div>
+            </div>
 
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow mb-8 grid grid-cols-3 gap-4">
-                <input
-                    placeholder="Nome do Produto"
-                    className="p-2 border rounded"
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    required
-                />
-                <input
-                    placeholder="Preço"
-                    type="number"
-                    step="0.01"
-                    className="p-2 border rounded"
-                    value={formData.price}
-                    onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
-                    required
-                />
-                <input
-                    placeholder="Estoque"
-                    type="number"
-                    className="p-2 border rounded"
-                    value={formData.stock}
-                    onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
-                    required
-                />
-                <button className="bg-indigo-600 text-white p-2 rounded col-span-3">Cadastrar Produto</button>
-            </form>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+                {/* Form Column */}
+                <div className="xl:col-span-1">
+                    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 sticky top-10">
+                        <div className="flex items-center space-x-3 mb-8">
+                            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                                <PackagePlus size={20} />
+                            </div>
+                            <h2 className="text-lg font-bold text-slate-900">Novo Produto</h2>
+                        </div>
 
-            <div className="bg-white rounded shadow overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="p-4">Nome</th>
-                            <th className="p-4">Preço</th>
-                            <th className="p-4">Estoque</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {products.map((p: any) => (
-                            <tr key={p.id} className="border-t">
-                                <td className="p-4">{p.name}</td>
-                                <td className="p-4">R$ {Number(p.price).toFixed(2)}</td>
-                                <td className="p-4">{p.stock}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        <div className="space-y-5">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Descrição do Produto</label>
+                                <input
+                                    placeholder="Ex: Teclado Mecânico RGB"
+                                    className="w-full p-4 bg-slate-50 border-none rounded-2xl text-slate-900 font-medium focus:ring-2 focus:ring-emerald-600 outline-none transition-all"
+                                    value={formData.name}
+                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Preço Un.</label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="w-full pl-10 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-slate-900 font-medium focus:ring-2 focus:ring-emerald-600 outline-none transition-all"
+                                            value={formData.price}
+                                            onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Estoque</label>
+                                    <div className="relative">
+                                        <BarChart3 size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                        <input
+                                            type="number"
+                                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl text-slate-900 font-medium focus:ring-2 focus:ring-emerald-600 outline-none transition-all"
+                                            value={formData.stock}
+                                            onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button className="w-full bg-emerald-600 text-white p-5 rounded-2xl font-bold shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all duration-200 mt-4">
+                                Adicionar ao Estoque
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Table Column */}
+                <div className="xl:col-span-2">
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="border-b border-slate-100 italic">
+                                    <th className="p-6 text-xs font-bold text-slate-400 uppercase tracking-widest">Produto</th>
+                                    <th className="p-6 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Price</th>
+                                    <th className="p-6 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Status</th>
+                                    <th className="p-6 text-xs font-bold text-slate-400 uppercase tracking-widest"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {products.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="p-10 text-center text-slate-400 font-medium italic">Nenhum produto cadastrado.</td>
+                                    </tr>
+                                ) : (
+                                    products.map((p: any) => (
+                                        <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150 group">
+                                            <td className="p-6">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                                                        <Package size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-slate-900">{p.name}</div>
+                                                        <div className="text-slate-400 text-xs font-mono">ID: {p.id.substring(0, 8)}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-6 text-center">
+                                                <div className="text-sm font-black text-slate-900">R$ {Number(p.price).toFixed(2)}</div>
+                                            </td>
+                                            <td className="p-6 text-center">
+                                                <span className={`px-4 py-1.5 rounded-full text-xs font-bold ${p.stock > 10 ? 'bg-emerald-100 text-emerald-700' : p.stock > 0 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                                                    {p.stock} em estoque
+                                                </span>
+                                            </td>
+                                            <td className="p-6 text-right">
+                                                <button className="p-2 text-slate-400 hover:text-emerald-600 transition-colors">
+                                                    <MoreVertical size={20} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </Layout>
     );
