@@ -192,7 +192,7 @@ export const Products: React.FC = () => {
                             <input
                                 type="text"
                                 placeholder="Procurar no estoque por nome, SKU ou EAN..."
-                                className="pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl w-full text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-600/20 transition-all"
+                                className="pl-12 pr-4 py-4 bg-slate-100 border border-slate-200 rounded-2xl w-full text-sm font-medium outline-none focus:ring-4 focus:ring-indigo-600/10 transition-all placeholder:text-slate-400"
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
                             />
@@ -206,7 +206,7 @@ export const Products: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto pb-32">
                     <table className="w-full text-left">
                         <thead>
                             <tr className="border-b border-slate-100 italic">
@@ -273,7 +273,7 @@ export const Products: React.FC = () => {
                                             {activeMenuId === p.id && (
                                                 <>
                                                     <div className="fixed inset-0 z-10" onClick={() => setActiveMenuId(null)}></div>
-                                                    <div className="absolute right-10 top-20 bg-white border border-slate-100 shadow-2xl rounded-2xl py-3 w-56 z-20 animate-in fade-in zoom-in duration-200 overflow-hidden">
+                                                    <div className="absolute right-10 top-12 bg-white border border-slate-100 shadow-2xl rounded-2xl py-3 w-56 z-20 animate-in fade-in zoom-in duration-200 overflow-hidden">
                                                         <button
                                                             onClick={() => handleEdit(p)}
                                                             className="w-full flex items-center space-x-3 px-6 py-4 text-sm font-black uppercase tracking-widest text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all text-left"
@@ -320,7 +320,7 @@ export const Products: React.FC = () => {
                                     <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-2 ml-1">Descrição do Produto</label>
                                     <input
                                         placeholder="Preencha aqui a Descrição do Produto"
-                                        className="w-full text-xl font-black text-slate-800 bg-slate-50 px-6 py-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-indigo-600/10 placeholder:text-slate-300 transition-all shadow-inner"
+                                        className="w-full text-xl font-black text-slate-800 bg-slate-100/50 px-6 py-4 rounded-2xl border border-slate-200 outline-none focus:ring-4 focus:ring-indigo-600/10 placeholder:text-slate-400 transition-all shadow-inner"
                                         value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
                                         required
@@ -349,7 +349,7 @@ export const Products: React.FC = () => {
                                         </label>
                                         <input
                                             placeholder="SKU"
-                                            className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all"
+                                            className="w-full p-4 bg-slate-100/50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all placeholder:text-slate-400"
                                             value={formData.sku}
                                             onChange={e => setFormData({ ...formData, sku: e.target.value })}
                                         />
@@ -366,7 +366,7 @@ export const Products: React.FC = () => {
                                     <div className="col-span-3">
                                         <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-2 ml-1">Unidade</label>
                                         <select
-                                            className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all appearance-none cursor-pointer"
+                                            className="w-full p-4 bg-slate-100/50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all appearance-none cursor-pointer"
                                             value={formData.unit}
                                             onChange={e => setFormData({ ...formData, unit: e.target.value })}
                                         >
@@ -384,7 +384,7 @@ export const Products: React.FC = () => {
                                             <input
                                                 step="0.01"
                                                 type="number"
-                                                className="w-full pl-10 pr-4 py-4 bg-white border border-slate-200 rounded-xl text-right text-lg font-black text-indigo-600 outline-none ring-offset-2 focus:ring-2 focus:ring-indigo-600 transition-all"
+                                                className="w-full pl-10 pr-4 py-4 bg-indigo-50/30 border border-slate-200 rounded-xl text-right text-lg font-black text-indigo-600 outline-none ring-offset-2 focus:ring-2 focus:ring-indigo-600 transition-all placeholder:text-slate-400"
                                                 value={formData.price}
                                                 onChange={e => setFormData({ ...formData, price: Number(e.target.value) })}
                                             />
@@ -398,7 +398,7 @@ export const Products: React.FC = () => {
                                         <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-2 ml-1">Código NCM</label>
                                         <input
                                             placeholder="Selecione ou digite aqui o NCM"
-                                            className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all"
+                                            className="w-full p-4 bg-slate-100/50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all placeholder:text-slate-400"
                                             value={formData.ncm}
                                             onChange={e => setFormData({ ...formData, ncm: e.target.value })}
                                         />
@@ -407,7 +407,7 @@ export const Products: React.FC = () => {
                                         <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-2 ml-1">Família de Produto</label>
                                         <input
                                             placeholder="Opcional"
-                                            className="w-full p-4 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all"
+                                            className="w-full p-4 bg-slate-100/50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-600/10 transition-all placeholder:text-slate-400"
                                             value={formData.family}
                                             onChange={e => setFormData({ ...formData, family: e.target.value })}
                                         />
@@ -443,7 +443,7 @@ export const Products: React.FC = () => {
                                                 <div>
                                                     <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-4 ml-1 italic">Gestão de Inventário</label>
                                                     <div className="space-y-6">
-                                                        <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                                        <div className="flex items-center justify-between p-4 bg-indigo-50/30 rounded-2xl border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-indigo-600/10 transition-all">
                                                             <div className="flex items-center space-x-3 text-slate-600">
                                                                 <Package size={18} className="text-indigo-600" />
                                                                 <div className="text-xs font-bold font-mono">Estoque Disponível</div>
@@ -455,7 +455,7 @@ export const Products: React.FC = () => {
                                                                 onChange={e => setFormData({ ...formData, stock: Number(e.target.value) })}
                                                             />
                                                         </div>
-                                                        <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                                        <div className="flex items-center justify-between p-4 bg-indigo-50/30 rounded-2xl border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-indigo-600/10 transition-all">
                                                             <div className="flex items-center space-x-3 text-slate-600">
                                                                 <BarChart3 size={18} className="text-amber-500" />
                                                                 <div className="text-xs font-bold font-mono">Estoque Mínimo</div>
@@ -508,7 +508,7 @@ export const Products: React.FC = () => {
                                                 <textarea
                                                     rows={5}
                                                     placeholder="Informações adicionais para este produto..."
-                                                    className="w-full p-6 bg-white border border-slate-100 rounded-3xl outline-none font-medium text-slate-600 focus:ring-2 focus:ring-indigo-600/10 transition-all resize-none shadow-sm"
+                                                    className="w-full p-6 bg-indigo-50/30 border border-slate-200 rounded-3xl outline-none font-medium text-slate-600 focus:ring-2 focus:ring-indigo-600/10 transition-all resize-none shadow-sm placeholder:text-slate-400"
                                                     value={formData.observations}
                                                     onChange={e => setFormData({ ...formData, observations: e.target.value })}
                                                 ></textarea>

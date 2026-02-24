@@ -12,6 +12,7 @@ clientRoutes.use(authMiddleware);
 
 clientRoutes.get("/", clientController.list);
 clientRoutes.get("/:id", clientController.show);
+clientRoutes.get("/:id/history", clientController.getHistory);
 clientRoutes.post("/", upload.single("avatar"), clientController.create);
 clientRoutes.put("/:id", upload.single("avatar"), clientController.update);
 clientRoutes.delete("/:id", clientController.delete);
