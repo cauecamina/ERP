@@ -7,7 +7,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     const { signOut } = useAuth();
 
     return (
-        <div className="flex h-screen bg-slate-50 font-sans text-slate-900">
+        <div className="flex h-screen bg-indigo-50/40 font-sans text-slate-900">
             {/* Sidebar */}
             <aside className="w-72 bg-slate-900 text-white flex flex-col shadow-2xl z-20">
                 <div className="p-8 flex items-center space-x-3 bg-indigo-600/10">

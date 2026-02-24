@@ -15,6 +15,30 @@ export class Product {
     @Column()
     stock!: number;
 
+    @Column("decimal", { precision: 10, scale: 2, default: 0 })
+    min_stock!: number;
+
+    @Column({ nullable: true })
+    sku?: string;
+
+    @Column({ nullable: true })
+    ean?: string;
+
+    @Column({ default: "un" })
+    unit!: string;
+
+    @Column({ nullable: true })
+    ncm?: string;
+
+    @Column({ nullable: true })
+    family?: string;
+
+    @Column({ default: "simple" })
+    type!: "simple" | "kit" | "variation";
+
+    @Column("text", { nullable: true })
+    observations?: string;
+
     @Column({ nullable: true })
     image?: string;
 
