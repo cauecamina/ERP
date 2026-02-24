@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { Layout } from "../components/Layout";
+import { useNavigate } from "react-router-dom";
 import { Users, Box, ShoppingCart } from "lucide-react";
 
 export const Dashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = useState({ clients: 0, products: 0, orders: 0 });
 
     useEffect(() => {
@@ -19,8 +21,9 @@ export const Dashboard: React.FC = () => {
                     products: p.data.length,
                     orders: o.data.length
                 });
-            } catch (err) {
-                console.error(err);
+            } catch (err: any) {
+                console.error("Dashboard Stats Fetch Error:", err);
+                alert("Erro ao carregar dados do dashboard. Verifique sua conexão ou o servidor.");
             }
         }
         loadStats();
@@ -74,7 +77,10 @@ export const Dashboard: React.FC = () => {
                 <div className="max-w-2xl">
                     <h3 className="text-2xl font-bold mb-4">Novo Pedido?</h3>
                     <p className="text-indigo-100 mb-8 leading-relaxed">Prepare uma nova venda rapidamente. O sistema irá gerenciar automaticamente o estoque e as contas a receber para você.</p>
-                    <button className="px-8 py-4 bg-white text-indigo-700 rounded-2xl font-bold shadow-md hover:bg-slate-50 transition-colors duration-200">
+                    <button
+                        onClick={() => navigate("/orders")}
+                        className="px-8 py-4 bg-white text-indigo-700 rounded-2xl font-bold shadow-md hover:bg-slate-50 transition-colors duration-200 cursor-pointer"
+                    >
                         Criar Novo Pedido
                     </button>
                 </div>

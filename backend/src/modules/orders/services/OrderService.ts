@@ -2,6 +2,7 @@ import { AppDataSource } from "../../../database/data-source";
 import { Order } from "../entities/Order";
 import { OrderItem } from "../entities/OrderItem";
 import { productRepository } from "../../products/repositories/ProductRepository";
+import { orderRepository } from "../repositories/OrderRepository";
 import { accountReceivableRepository } from "../../accounts-receivable/repositories/AccountReceivableRepository";
 import { CustomError } from "../../../middlewares/errorMiddleware";
 
