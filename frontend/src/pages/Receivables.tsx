@@ -40,7 +40,7 @@ export const Receivables: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-visible">
                 <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
                     <h2 className="text-lg font-bold text-slate-900">Lançamentos Gerados</h2>
                     <div className="relative">
@@ -93,8 +93,8 @@ export const Receivables: React.FC = () => {
                                     </td>
                                     <td className="p-6 text-center">
                                         <span className={`inline-flex items-center space-x-1.5 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider ${r.status === 'paid'
-                                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                                : 'bg-amber-100 text-amber-700 border border-amber-200 shadow-sm shadow-amber-500/10'
+                                            ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                            : 'bg-amber-100 text-amber-700 border border-amber-200 shadow-sm shadow-amber-500/10'
                                             }`}>
                                             {r.status === 'paid' ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
                                             <span>{r.status === 'paid' ? 'Liquidado' : 'Aguardando'}</span>

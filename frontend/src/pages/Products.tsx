@@ -6,6 +6,8 @@ import { PackagePlus, BarChart3, Search, MoreVertical, Package, Edit2, Trash2, X
 export const Products: React.FC = () => {
     const [products, setProducts] = useState([]);
     const [formData, setFormData] = useState({ name: "", price: 0, stock: 0 });
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
@@ -21,17 +23,37 @@ export const Products: React.FC = () => {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
+            const data = new FormData();
+            data.append("name", formData.name);
+            data.append("price", String(formData.price));
+            data.append("stock", String(formData.stock));
+
+            if (imageFile) {
+                data.append("image", imageFile);
+            }
+
             if (editingId) {
-                await api.put(`/products/${editingId}`, formData);
+                await api.put(`/products/${editingId}`, data);
                 setEditingId(null);
             } else {
-                await api.post("/products", formData);
+                await api.post("/products", data);
             }
+
             setFormData({ name: "", price: 0, stock: 0 });
+            setImageFile(null);
+            setImagePreview(null);
             loadProducts();
         } catch (err) {
             console.error(err);
             alert("Erro ao salvar produto.");
+        }
+    }
+
+    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
     }
 
@@ -49,6 +71,7 @@ export const Products: React.FC = () => {
 
     function handleEdit(p: any) {
         setFormData({ name: p.name, price: Number(p.price), stock: Number(p.stock) });
+        setImagePreview(p.image ? `${api.defaults.baseURL}/files/${p.image}` : null);
         setEditingId(p.id);
         setActiveMenuId(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -57,6 +80,8 @@ export const Products: React.FC = () => {
     function cancelEdit() {
         setEditingId(null);
         setFormData({ name: "", price: 0, stock: 0 });
+        setImageFile(null);
+        setImagePreview(null);
     }
 
     return (
@@ -98,6 +123,28 @@ export const Products: React.FC = () => {
                         </div>
 
                         <div className="space-y-5">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Imagem do Produto</label>
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-20 h-20 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden relative group">
+                                        {imagePreview ? (
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <Package className="text-slate-300" size={24} />
+                                        )}
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={handleFileChange}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Clique no quadro ao lado para selecionar uma foto do produto.</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Descrição do Produto</label>
                                 <input
@@ -167,8 +214,12 @@ export const Products: React.FC = () => {
                                         <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150 group">
                                             <td className="p-6">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
-                                                        <Package size={20} />
+                                                    <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm overflow-hidden">
+                                                        {p.image ? (
+                                                            <img src={`${api.defaults.baseURL}/files/${p.image}`} alt={p.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <Package size={20} />
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-slate-900">{p.name}</div>

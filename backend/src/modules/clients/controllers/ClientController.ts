@@ -5,7 +5,11 @@ const clientService = new ClientService();
 
 export class ClientController {
     async create(req: Request, res: Response) {
-        const client = await clientService.create(req.body);
+        const data = {
+            ...req.body,
+            avatar: req.file ? req.file.filename : undefined
+        };
+        const client = await clientService.create(data);
         return res.status(201).json(client);
     }
 
@@ -20,7 +24,11 @@ export class ClientController {
     }
 
     async update(req: Request, res: Response) {
-        const client = await clientService.update(req.params.id, req.body);
+        const data = {
+            ...req.body,
+            avatar: req.file ? req.file.filename : req.body.avatar
+        };
+        const client = await clientService.update(req.params.id, data);
         return res.json(client);
     }
 

@@ -6,6 +6,8 @@ import { UserPlus, Mail, Phone, CreditCard, Search, MoreVertical, Edit2, Trash2,
 export const Clients: React.FC = () => {
     const [clients, setClients] = useState([]);
     const [formData, setFormData] = useState({ name: "", cpf_cnpj: "", email: "", phone: "" });
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
@@ -21,17 +23,37 @@ export const Clients: React.FC = () => {
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
+            const data = new FormData();
+            data.append("name", formData.name);
+            data.append("cpf_cnpj", formData.cpf_cnpj);
+            data.append("email", formData.email);
+            data.append("phone", formData.phone);
+
+            if (avatarFile) {
+                data.append("avatar", avatarFile);
+            }
+
             if (editingId) {
-                await api.put(`/clients/${editingId}`, formData);
+                await api.put(`/clients/${editingId}`, data);
                 setEditingId(null);
             } else {
-                await api.post("/clients", formData);
+                await api.post("/clients", data);
             }
             setFormData({ name: "", cpf_cnpj: "", email: "", phone: "" });
+            setAvatarFile(null);
+            setAvatarPreview(null);
             loadClients();
         } catch (err) {
             console.error(err);
             alert("Erro ao salvar cliente.");
+        }
+    }
+
+    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setAvatarFile(file);
+            setAvatarPreview(URL.createObjectURL(file));
         }
     }
 
@@ -49,6 +71,7 @@ export const Clients: React.FC = () => {
 
     function handleEdit(c: any) {
         setFormData({ name: c.name, cpf_cnpj: c.cpf_cnpj, email: c.email, phone: c.phone });
+        setAvatarPreview(c.avatar ? `${api.defaults.baseURL}/files/${c.avatar}` : null);
         setEditingId(c.id);
         setActiveMenuId(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -57,6 +80,8 @@ export const Clients: React.FC = () => {
     function cancelEdit() {
         setEditingId(null);
         setFormData({ name: "", cpf_cnpj: "", email: "", phone: "" });
+        setAvatarFile(null);
+        setAvatarPreview(null);
     }
 
     return (
@@ -98,6 +123,28 @@ export const Clients: React.FC = () => {
                         </div>
 
                         <div className="space-y-5">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Foto de Perfil</label>
+                                <div className="flex items-center space-x-4">
+                                    <div className="w-20 h-20 rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden relative group">
+                                        {avatarPreview ? (
+                                            <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <UserPlus className="text-slate-300" size={24} />
+                                        )}
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            onChange={handleFileChange}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] text-slate-400 font-medium leading-relaxed">Clique no círculo para subir uma foto do cliente (opcional).</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nome Completo</label>
                                 <input
@@ -176,8 +223,12 @@ export const Clients: React.FC = () => {
                                         <tr key={c.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150 group">
                                             <td className="p-6">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">
-                                                        {c.name.charAt(0)}
+                                                    <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm overflow-hidden">
+                                                        {c.avatar ? (
+                                                            <img src={`${api.defaults.baseURL}/files/${c.avatar}`} alt={c.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            c.name.charAt(0)
+                                                        )}
                                                     </div>
                                                     <div>
                                                         <div className="font-bold text-slate-900">{c.name}</div>

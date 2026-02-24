@@ -159,8 +159,12 @@ export const Orders: React.FC = () => {
                                             </div>
 
                                             <div className="flex items-start space-x-3 mb-6">
-                                                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
-                                                    <User size={20} />
+                                                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 overflow-hidden group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                                                    {o.client?.avatar ? (
+                                                        <img src={`${api.defaults.baseURL}/files/${o.client.avatar}`} alt={o.client.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <User size={20} />
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <div className="font-black text-lg text-slate-900 leading-tight mb-1">{o.client?.name}</div>
