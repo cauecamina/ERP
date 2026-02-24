@@ -40,4 +40,10 @@ export class ClientService {
         const client = await this.findById(id);
         await clientRepository.remove(client);
     }
+
+    async bulkCreate(data: any[]) {
+        const clients = clientRepository.create(data);
+        await clientRepository.save(clients);
+        return clients;
+    }
 }

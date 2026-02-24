@@ -18,8 +18,21 @@ export class Order {
     @Column("decimal", { precision: 10, scale: 2 })
     total_value!: number;
 
-    @Column({ default: "pending" })
-    status!: "pending" | "paid" | "shipped" | "delivered" | "canceled";
+    @Column("decimal", { precision: 10, scale: 2, default: 0 })
+    discount_value!: number;
+
+    @Column({
+        type: "enum",
+        enum: ["pending", "picking", "to_invoice", "invoiced", "delivery", "delivered", "canceled"],
+        default: "pending"
+    })
+    status!: "pending" | "picking" | "to_invoice" | "invoiced" | "delivery" | "delivered" | "canceled";
+
+    @Column({ nullable: true })
+    vendedor?: string;
+
+    @Column({ type: "date", nullable: true })
+    billing_preview_date?: Date;
 
     @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
     items!: OrderItem[];

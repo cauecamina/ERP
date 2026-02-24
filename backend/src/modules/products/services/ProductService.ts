@@ -40,6 +40,21 @@ export class ProductService {
 
     async delete(id: string) {
         const product = await this.findById(id);
+
+        // Check for sales history before deleting
+        const { orderItemRepository } = require("../../orders/repositories/OrderRepository");
+        const hasHistory = await orderItemRepository.findOneBy({ product_id: id });
+
+        if (hasHistory) {
+            throw new CustomError("Não é possível excluir um produto com histórico de vendas. Desative-o em vez disso.", 400);
+        }
+
         await productRepository.remove(product);
+    }
+
+    async bulkCreate(data: any[]) {
+        const products = productRepository.create(data);
+        await productRepository.save(products);
+        return products;
     }
 }

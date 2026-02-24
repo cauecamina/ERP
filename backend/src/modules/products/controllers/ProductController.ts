@@ -45,4 +45,9 @@ export class ProductController {
         await productService.delete(req.params.id);
         return res.status(204).send();
     }
+
+    async bulkCreate(req: Request, res: Response) {
+        const products = await productService.bulkCreate(req.body);
+        return res.status(201).json(products);
+    }
 }

@@ -3,7 +3,7 @@ import { api } from "../services/api";
 import { Layout } from "../components/Layout";
 import {
     UserPlus, Phone, Search, MoreVertical,
-    Edit2, Trash2, X, Info, MapPin, Building2, History, Settings, Save, AtSign
+    Edit2, Trash2, X, Info, MapPin, Building2, History, Settings, Save, AtSign, Download, Upload, FileSpreadsheet
 } from "lucide-react";
 
 export const Clients: React.FC = () => {
@@ -11,6 +11,8 @@ export const Clients: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("endereco");
     const [purchaseHistory, setPurchaseHistory] = useState<any[]>([]);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+    const [importPreviewData, setImportPreviewData] = useState<any[] | null>(null);
 
     const initialFormData = {
         name: "",
@@ -156,6 +158,128 @@ export const Clients: React.FC = () => {
         setIsModalOpen(true);
     }
 
+    function handleExportCSV() {
+        if (filteredClients.length === 0) {
+            alert("Não há dados para exportar com os filtros atuais.");
+            return;
+        }
+
+        const headers = ["ID", "Nome/Razão Social", "Fantasia", "CNPJ/CPF", "E-mail", "Telefone", "Cidade", "Estado", "Status"];
+        const rows = filteredClients.map((c: any) => [
+            c.id,
+            c.name,
+            c.fantasy_name || "",
+            c.cpf_cnpj,
+            c.email,
+            `(${c.ddd}) ${c.phone}`,
+            c.city || "",
+            c.state || "",
+            c.active ? "Ativo" : "Inativo"
+        ]);
+
+        const csvContent = [
+            headers.join(";"),
+            ...rows.map(row => row.join(";"))
+        ].join("\n");
+
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `clientes_${new Date().toLocaleDateString('en-CA')}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    function handleDownloadTemplate() {
+        const headers = [
+            "Nome/Razão Social", "Nome Fantasia", "CPF/CNPJ", "E-mail", "DDD", "Telefone",
+            "Endereço", "Número", "Bairro", "Cidade", "Estado", "CEP"
+        ];
+        const csvContent = headers.join(";");
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "modelo_clientes_minierp.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    async function handleImportCSV(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const text = event.target?.result as string;
+            const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+            if (lines.length === 0) return;
+
+            // Auto-detect separator
+            const firstLine = lines[0];
+            const semicolonCount = (firstLine.match(/;/g) || []).length;
+            const commaCount = (firstLine.match(/,/g) || []).length;
+            const separator = semicolonCount >= commaCount ? ";" : ",";
+
+            const headers = lines[0].replace("\r", "").split(separator).map(h => h.trim());
+
+            const mapping: { [key: string]: string } = {
+                "Nome/Razão Social": "name",
+                "Nome Fantasia": "fantasy_name",
+                "CPF/CNPJ": "cpf_cnpj",
+                "E-mail": "email",
+                "DDD": "ddd",
+                "Telefone": "phone",
+                "Endereço": "street",
+                "Número": "number",
+                "Bairro": "neighborhood",
+                "Cidade": "city",
+                "Estado": "state",
+                "CEP": "zip_code"
+            };
+
+            const data = lines.slice(1).map(line => {
+                const values = line.split(separator);
+                const obj: any = {};
+                headers.forEach((header, index) => {
+                    const internalKey = mapping[header];
+                    if (internalKey) {
+                        obj[internalKey] = values[index]?.trim();
+                    }
+                });
+                return obj;
+            }).filter(obj => obj.name);
+
+            if (data.length === 0) {
+                alert("Nenhum dado válido encontrado. Verifique se os nomes das colunas estão corretos e use o modelo sugerido.");
+                return;
+            }
+
+            setImportPreviewData(data);
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+    }
+
+    async function confirmImport() {
+        if (!importPreviewData) return;
+        try {
+            await api.post("/clients/bulk", importPreviewData);
+            alert(`${importPreviewData.length} clientes importados com sucesso!`);
+            setImportPreviewData(null);
+            setIsImportModalOpen(false);
+            loadClients();
+        } catch (err: any) {
+            console.error(err);
+            const errorMsg = err.response?.data?.message || "Verifique o formato do arquivo.";
+            alert(`Erro ao importar: ${errorMsg}`);
+        }
+    }
+
     return (
         <Layout>
             {/* Professional Header */}
@@ -165,6 +289,19 @@ export const Clients: React.FC = () => {
                     <p className="text-slate-500 mt-1 font-medium">Gestão estratégica da sua carteira de parceiros.</p>
                 </div>
                 <div className="flex items-center space-x-4">
+                    <button
+                        onClick={handleExportCSV}
+                        className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4 hover:bg-slate-50 transition-all group"
+                    >
+                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <Download size={20} />
+                        </div>
+                        <div className="text-left hidden md:block">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Exportar</div>
+                            <div className="text-[11px] font-black text-slate-900 leading-none">PLANILHA</div>
+                        </div>
+                    </button>
+
                     <div className="hidden lg:flex items-center space-x-6 px-10 border-r border-slate-200">
                         <div className="text-center">
                             <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total de Clientes</div>
@@ -175,6 +312,19 @@ export const Clients: React.FC = () => {
                             <div className="text-2xl font-black text-emerald-600">{clients.filter((c: any) => c.active).length}</div>
                         </div>
                     </div>
+                    <button
+                        onClick={() => setIsImportModalOpen(true)}
+                        className="bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4 hover:bg-slate-50 transition-all group"
+                    >
+                        <div className="w-10 h-10 bg-slate-50 text-slate-400 rounded-xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all">
+                            <Upload size={20} />
+                        </div>
+                        <div className="text-left hidden md:block">
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Lote</div>
+                            <div className="text-[11px] font-black text-slate-900 leading-none">IMPORTAR</div>
+                        </div>
+                    </button>
+
                     <button
                         onClick={openNewClientModal}
                         className="flex items-center space-x-3 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
@@ -606,6 +756,132 @@ export const Clients: React.FC = () => {
                             </div>
                         </div>
                     </form>
+                </div>
+            )}
+            {/* Import Modal */}
+            {isImportModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300">
+                        <div className="p-10 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">Importação em Lote</h3>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Clientes via CSV</p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setImportPreviewData(null);
+                                    setIsImportModalOpen(false);
+                                }}
+                                className="p-3 bg-white text-slate-400 hover:text-red-500 rounded-2xl shadow-sm border border-slate-100 transition-all"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-10 space-y-8">
+                            {importPreviewData ? (
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="font-black text-slate-900 text-sm uppercase">Prévia da Importação ({importPreviewData.length} itens)</h4>
+                                        <button
+                                            onClick={() => setImportPreviewData(null)}
+                                            className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
+                                        >
+                                            Limpar / Trocar Arquivo
+                                        </button>
+                                    </div>
+                                    <div className="border border-slate-100 rounded-3xl overflow-hidden bg-slate-50/30">
+                                        <div className="max-h-[300px] overflow-y-auto">
+                                            <table className="w-full text-left text-[10px]">
+                                                <thead className="bg-white border-b border-slate-100 sticky top-0">
+                                                    <tr>
+                                                        <th className="p-4 font-black uppercase text-slate-400">Nome</th>
+                                                        <th className="p-4 font-black uppercase text-slate-400">CPF/CNPJ</th>
+                                                        <th className="p-4 font-black uppercase text-slate-400">Cidade</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100/50">
+                                                    {importPreviewData.slice(0, 10).map((item, idx) => (
+                                                        <tr key={idx} className="bg-white/40">
+                                                            <td className="p-4 font-bold text-slate-700">{item.name}</td>
+                                                            <td className="p-4 font-medium text-slate-500">{item.cpf_cnpj}</td>
+                                                            <td className="p-4 font-medium text-slate-500">{item.city}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        {importPreviewData.length > 10 && (
+                                            <div className="p-4 text-center bg-white/60 text-[9px] font-bold text-slate-400 uppercase italic">
+                                                ...e mais {importPreviewData.length - 10} registros
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        onClick={confirmImport}
+                                        className="w-full py-5 bg-indigo-600 text-white rounded-[24px] font-black uppercase text-[11px] tracking-[0.2em] shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center space-x-3"
+                                    >
+                                        <Save size={18} />
+                                        <span>Confirmar Importação</span>
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100 flex items-start space-x-4">
+                                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                                            <FileSpreadsheet size={24} />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-slate-900 text-sm uppercase">1. Baixe o Modelo</h4>
+                                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">Use nossa planilha padrão para garantir que os dados sejam importados corretamente.</p>
+                                            <button
+                                                onClick={handleDownloadTemplate}
+                                                className="mt-4 flex items-center space-x-2 text-indigo-600 font-black text-[10px] tracking-widest uppercase hover:underline"
+                                            >
+                                                <Download size={14} />
+                                                <span>Download Template.csv</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-start space-x-4">
+                                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-900 shadow-sm shrink-0">
+                                            <Upload size={24} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-black text-slate-900 text-sm uppercase">2. Envie o Arquivo</h4>
+                                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">Após preencher, selecione o arquivo CSV para processar o cadastro.</p>
+
+                                            <label className="mt-4 block cursor-pointer">
+                                                <div className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center hover:bg-white hover:border-indigo-400 transition-all bg-slate-100/30">
+                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Selecionar CSV</span>
+                                                    <input
+                                                        type="file"
+                                                        accept=".csv"
+                                                        className="hidden"
+                                                        onChange={handleImportCSV}
+                                                    />
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="p-10 bg-slate-50/50 border-t border-slate-100 flex justify-end">
+                            <button
+                                onClick={() => {
+                                    setImportPreviewData(null);
+                                    setIsImportModalOpen(false);
+                                }}
+                                className="px-8 py-4 font-black text-slate-400 uppercase text-[11px] tracking-widest hover:text-slate-600 transition-all"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </Layout>

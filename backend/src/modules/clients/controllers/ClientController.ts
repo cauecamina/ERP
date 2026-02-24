@@ -43,4 +43,9 @@ export class ClientController {
         await clientService.delete(req.params.id);
         return res.status(204).send();
     }
+
+    async bulkCreate(req: Request, res: Response) {
+        const clients = await clientService.bulkCreate(req.body);
+        return res.status(201).json(clients);
+    }
 }

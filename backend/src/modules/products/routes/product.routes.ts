@@ -13,6 +13,7 @@ productRoutes.use(authMiddleware);
 productRoutes.get("/", productController.list);
 productRoutes.get("/:id", productController.show);
 productRoutes.get("/:id/history", productController.getHistory);
+productRoutes.post("/bulk", productController.bulkCreate);
 productRoutes.post("/", upload.single("image"), productController.create);
 productRoutes.put("/:id", upload.single("image"), productController.update);
 productRoutes.delete("/:id", productController.delete);
