@@ -7,6 +7,8 @@ export class ProductController {
     async create(req: Request, res: Response) {
         const data = {
             ...req.body,
+            active: req.body.active === "true" || req.body.active === true,
+            show_image: req.body.show_image === "true" || req.body.show_image === true,
             image: req.file ? req.file.filename : undefined
         };
         const product = await productService.create(data);
@@ -26,10 +28,17 @@ export class ProductController {
     async update(req: Request, res: Response) {
         const data = {
             ...req.body,
+            active: req.body.active === "true" || req.body.active === true,
+            show_image: req.body.show_image === "true" || req.body.show_image === true,
             image: req.file ? req.file.filename : req.body.image
         };
         const product = await productService.update(req.params.id, data);
         return res.json(product);
+    }
+
+    async getHistory(req: Request, res: Response) {
+        const history = await productService.getHistory(req.params.id);
+        return res.json(history);
     }
 
     async delete(req: Request, res: Response) {

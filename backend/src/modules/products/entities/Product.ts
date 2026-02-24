@@ -39,6 +39,12 @@ export class Product {
     @Column("text", { nullable: true })
     observations?: string;
 
+    @Column({ default: true })
+    active!: boolean;
+
+    @Column({ default: true })
+    show_image!: boolean;
+
     @Column({ nullable: true })
     image?: string;
 

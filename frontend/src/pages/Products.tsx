@@ -11,6 +11,7 @@ export const Products: React.FC = () => {
     const [products, setProducts] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("estoque");
+    const [salesHistory, setSalesHistory] = useState<any[]>([]);
 
     const initialFormData = {
         name: "",
@@ -23,7 +24,9 @@ export const Products: React.FC = () => {
         ncm: "",
         family: "",
         type: "simple",
-        observations: ""
+        observations: "",
+        active: true,
+        show_image: true
     };
 
     const [formData, setFormData] = useState(initialFormData);
@@ -42,6 +45,21 @@ export const Products: React.FC = () => {
         try {
             const response = await api.get("/products");
             setProducts(response.data);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    useEffect(() => {
+        if (isModalOpen && editingId && activeTab === "historico") {
+            loadHistory();
+        }
+    }, [isModalOpen, editingId, activeTab]);
+
+    async function loadHistory() {
+        try {
+            const response = await api.get(`/products/${editingId}/history`);
+            setSalesHistory(response.data);
         } catch (err) {
             console.error(err);
         }
@@ -118,7 +136,9 @@ export const Products: React.FC = () => {
             ncm: p.ncm || "",
             family: p.family || "",
             type: p.type || "simple",
-            observations: p.observations || ""
+            observations: p.observations || "",
+            active: p.active ?? true,
+            show_image: p.show_image ?? true
         });
         setImagePreview(p.image ? `${api.defaults.baseURL}/files/${p.image}` : null);
         setEditingId(p.id);
@@ -183,12 +203,6 @@ export const Products: React.FC = () => {
                         </button>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <button className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:text-indigo-600 transition-colors">
-                            <Tag size={20} />
-                        </button>
-                        <button className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:text-indigo-600 transition-colors">
-                            <Settings size={20} />
-                        </button>
                     </div>
                 </div>
 
@@ -210,18 +224,21 @@ export const Products: React.FC = () => {
                                 </tr>
                             ) : (
                                 filteredProducts.map((p: any) => (
-                                    <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150 group">
+                                    <tr key={p.id} className={`border-b border-slate-50 hover:bg-slate-50/50 transition-colors duration-150 group ${!p.active ? 'opacity-50 grayscale' : ''}`}>
                                         <td className="p-8 px-10">
                                             <div className="flex items-center space-x-5">
-                                                <div className="w-14 h-14 rounded-2xl bg-white border border-slate-100 text-slate-200 flex items-center justify-center font-bold text-sm overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
-                                                    {p.image ? (
+                                                <div className="w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 text-slate-300 flex items-center justify-center font-bold text-sm overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
+                                                    {(p.image && p.show_image) ? (
                                                         <img src={`${api.defaults.baseURL}/files/${p.image}`} alt={p.name} className="w-full h-full object-cover" />
                                                     ) : (
                                                         <Package size={22} className="opacity-50" />
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <div className="font-black text-slate-900 text-base">{p.name}</div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="font-black text-slate-900 text-base">{p.name}</div>
+                                                        {!p.active && <span className="bg-slate-200 text-slate-500 text-[8px] font-black uppercase px-2 py-0.5 rounded-full">Inativo</span>}
+                                                    </div>
                                                     <div className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1 italic">{p.family || 'Geral'} • {p.unit}</div>
                                                 </div>
                                             </div>
@@ -469,7 +486,19 @@ export const Products: React.FC = () => {
                                                             Alterar Imagem
                                                         </div>
                                                     </div>
-                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Fotos do Produto</p>
+                                                    <div className="flex flex-col items-center">
+                                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mb-2">Fotos do Produto</p>
+                                                        <div className="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 scale-90">
+                                                            <span className="text-[8px] font-black text-slate-500 uppercase">Exibir</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setFormData({ ...formData, show_image: !formData.show_image })}
+                                                                className={`w-8 h-4 rounded-full transition-all relative ${formData.show_image ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                                                            >
+                                                                <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${formData.show_image ? 'left-4' : 'left-0.5'}`}></div>
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
@@ -485,7 +514,51 @@ export const Products: React.FC = () => {
                                                 ></textarea>
                                             </div>
                                         )}
-                                        {['fiscal', 'fornecedores', 'historico'].includes(activeTab) && (
+                                        {activeTab === 'historico' && (
+                                            <div className="space-y-6">
+                                                <label className="block text-[10px] font-black text-slate-400 tracking-widest uppercase mb-2 ml-1 italic">Histórico de Movimentações (Vendas)</label>
+                                                {salesHistory.length === 0 ? (
+                                                    <div className="p-10 text-center py-20 flex flex-col items-center">
+                                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mb-4 border border-slate-50">
+                                                            <History size={30} />
+                                                        </div>
+                                                        <p className="text-sm font-black text-slate-300 uppercase tracking-widest">Nenhuma venda registrada para este produto.</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="bg-white rounded-[24px] border border-slate-100 overflow-hidden shadow-sm">
+                                                        <table className="w-full text-left text-xs">
+                                                            <thead>
+                                                                <tr className="bg-slate-50/50 border-b border-slate-100">
+                                                                    <th className="p-4 font-black text-slate-400 uppercase tracking-widest px-6">Data</th>
+                                                                    <th className="p-4 font-black text-slate-400 uppercase tracking-widest">Cliente</th>
+                                                                    <th className="p-4 font-black text-slate-400 uppercase tracking-widest text-center">Quant.</th>
+                                                                    <th className="p-4 font-black text-slate-400 uppercase tracking-widest text-right px-6">Vlr. Unitário</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {salesHistory.map((item: any) => (
+                                                                    <tr key={item.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                                                                        <td className="p-4 px-6 font-medium text-slate-500 whitespace-nowrap">
+                                                                            {new Date(item.order.created_at).toLocaleDateString('pt-BR')}
+                                                                        </td>
+                                                                        <td className="p-4 font-black text-slate-900">
+                                                                            {item.order.client?.name || 'Cliente Geral'}
+                                                                        </td>
+                                                                        <td className="p-4 text-center font-black text-indigo-600">
+                                                                            {item.quantity} {formData.unit}
+                                                                        </td>
+                                                                        <td className="p-4 text-right px-6 font-black text-slate-900 whitespace-nowrap">
+                                                                            R$ {Number(item.unit_price).toFixed(2)}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                        {['fiscal', 'fornecedores'].includes(activeTab) && (
                                             <div className="p-10 text-center py-20 flex flex-col items-center">
                                                 <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mb-4 border border-slate-50">
                                                     <Settings size={30} />
@@ -529,6 +602,22 @@ export const Products: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-4 pt-10">
+                                    <div className="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm mb-6">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <div className="text-[10px] font-black text-slate-900 uppercase tracking-tight">Status do Produto</div>
+                                                <div className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">{formData.active ? 'Ativo no Catálogo' : 'Inativo / Oculto'}</div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, active: !formData.active })}
+                                                className={`w-12 h-6 rounded-full transition-all relative ${formData.active ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                                            >
+                                                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.active ? 'left-7' : 'left-1'}`}></div>
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <button
                                         type="submit"
                                         className="w-full flex items-center justify-center space-x-3 bg-indigo-600 text-white p-5 rounded-3xl font-black uppercase text-[11px] tracking-[0.2em] shadow-2xl shadow-indigo-600/30 hover:bg-indigo-700 transition-all hover:-translate-y-1 active:scale-95 group"

@@ -25,6 +25,19 @@ export class ProductService {
         return product;
     }
 
+    async getHistory(id: string) {
+        const { orderItemRepository } = require("../../orders/repositories/OrderRepository");
+        return await orderItemRepository.find({
+            where: { product_id: id },
+            relations: ["order", "order.client"],
+            order: {
+                order: {
+                    created_at: "DESC"
+                }
+            }
+        });
+    }
+
     async delete(id: string) {
         const product = await this.findById(id);
         await productRepository.remove(product);
