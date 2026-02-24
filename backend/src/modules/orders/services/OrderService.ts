@@ -69,4 +69,13 @@ export class OrderService {
     async list() {
         return await orderRepository.find({ relations: ["client", "items", "items.product"] });
     }
+
+    async updateStatus(id: string, status: "pending" | "paid" | "shipped" | "delivered" | "canceled") {
+        const order = await orderRepository.findOneBy({ id });
+        if (!order) throw new CustomError("Order not found", 404);
+
+        order.status = status;
+        await orderRepository.save(order);
+        return order;
+    }
 }

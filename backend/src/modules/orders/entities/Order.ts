@@ -19,7 +19,7 @@ export class Order {
     total_value!: number;
 
     @Column({ default: "pending" })
-    status!: "pending" | "paid" | "canceled";
+    status!: "pending" | "paid" | "shipped" | "delivered" | "canceled";
 
     @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
     items!: OrderItem[];

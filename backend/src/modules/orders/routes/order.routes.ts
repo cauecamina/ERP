@@ -9,5 +9,6 @@ orderRoutes.use(authMiddleware);
 
 orderRoutes.post("/", orderController.create);
 orderRoutes.get("/", orderController.list);
+orderRoutes.patch("/:id/status", orderController.updateStatus);
 
 export { orderRoutes };

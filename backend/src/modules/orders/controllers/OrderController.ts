@@ -14,4 +14,10 @@ export class OrderController {
         const orders = await orderService.list();
         return res.json(orders);
     }
+
+    async updateStatus(req: Request, res: Response) {
+        const { status } = req.body;
+        const order = await orderService.updateStatus(req.params.id, status);
+        return res.json(order);
+    }
 }
