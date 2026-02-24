@@ -5,8 +5,8 @@ const orderService = new OrderService();
 
 export class OrderController {
     async create(req: Request, res: Response) {
-        const { client_id, items } = req.body;
-        const order = await orderService.create(client_id, items);
+        const { client_id, items, vendedor, discount_value, billing_preview_date } = req.body;
+        const order = await orderService.create(client_id, items, { vendedor, discount_value, billing_preview_date });
         return res.status(201).json(order);
     }
 

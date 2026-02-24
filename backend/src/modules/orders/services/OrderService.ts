@@ -7,7 +7,15 @@ import { accountReceivableRepository } from "../../accounts-receivable/repositor
 import { CustomError } from "../../../middlewares/errorMiddleware";
 
 export class OrderService {
-    async create(client_id: string, items: { product_id: string; quantity: number }[]) {
+    async create(
+        client_id: string,
+        items: { product_id: string; quantity: number }[],
+        additionalData: {
+            vendedor?: string,
+            discount_value?: number,
+            billing_preview_date?: string
+        } = {}
+    ) {
         return await AppDataSource.transaction(async (manager) => {
             let total_value = 0;
             const orderItems: OrderItem[] = [];
@@ -43,7 +51,10 @@ export class OrderService {
             // Create order
             const order = manager.create(Order, {
                 client_id,
-                total_value,
+                total_value: total_value - (Number(additionalData.discount_value) || 0),
+                discount_value: Number(additionalData.discount_value) || 0,
+                vendedor: additionalData.vendedor,
+                billing_preview_date: additionalData.billing_preview_date ? new Date(additionalData.billing_preview_date) : undefined,
                 items: orderItems,
             });
 
@@ -70,7 +81,7 @@ export class OrderService {
         return await orderRepository.find({ relations: ["client", "items", "items.product"] });
     }
 
-    async updateStatus(id: string, status: "pending" | "paid" | "shipped" | "delivered" | "canceled") {
+    async updateStatus(id: string, status: "pending" | "picking" | "to_invoice" | "invoiced" | "delivery" | "delivered" | "canceled") {
         const order = await orderRepository.findOneBy({ id });
         if (!order) throw new CustomError("Order not found", 404);
 

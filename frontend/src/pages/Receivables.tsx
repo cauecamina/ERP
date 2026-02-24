@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { Layout } from "../components/Layout";
-import { DollarSign, Search, Calendar, CheckCircle2, AlertCircle, ArrowUpRight, Download } from "lucide-react";
+import { DollarSign, Search, Calendar, CheckCircle2, AlertCircle, ArrowUpRight, Download, Filter } from "lucide-react";
+
+function toLocal(d: Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+const _today = toLocal(new Date());
+const _yesterday = toLocal(new Date(new Date().setDate(new Date().getDate() - 1)));
+const _weekAgo = toLocal(new Date(new Date().setDate(new Date().getDate() - 6)));
 
 export const Receivables: React.FC = () => {
     const [receivables, setReceivables] = useState([]);
-    const [filterDate, setFilterDate] = useState(new Date().toLocaleDateString('en-CA'));
+    const [dateFrom, setDateFrom] = useState(_today);
+    const [dateTo, setDateTo] = useState(_today);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
@@ -25,25 +36,21 @@ export const Receivables: React.FC = () => {
         const matchesSearch = r.order?.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             r.order_id.toLowerCase().includes(searchTerm.toLowerCase());
 
-        if (!filterDate) return matchesSearch;
-
-        // Extract dates safely (YYYY-MM-DD) converting from UTC to Local
-        const getLocalDatePart = (dateStr: string | null) => {
+        const getLocal = (dateStr: string | null) => {
             if (!dateStr) return null;
-            const date = new Date(dateStr);
-            return date.toLocaleDateString('en-CA');
+            return toLocal(new Date(dateStr));
         };
 
-        const orderDate = getLocalDatePart(r.order?.created_at || r.created_at);
-        const paymentDate = getLocalDatePart(r.paid_at);
+        const orderDate = getLocal(r.order?.created_at || r.created_at);
+        const paymentDate = getLocal(r.paid_at);
 
-        // Match if either the order was made today OR it was paid today
-        const matchesDate = orderDate === filterDate || paymentDate === filterDate;
+        const inRange = (d: string | null) => d != null && d >= dateFrom && d <= dateTo;
+        const matchesDate = inRange(orderDate) || inRange(paymentDate);
 
         return matchesSearch && matchesDate;
     });
 
-    const dailyBalance = filteredReceivables.reduce((acc, r: any) => r.status === 'paid' ? acc + Number(r.amount) : acc, 0);
+    const periodBalance = filteredReceivables.reduce((acc, r: any) => r.status === 'paid' ? acc + Number(r.amount) : acc, 0);
 
     async function handlePay(id: string) {
         try {
@@ -85,7 +92,7 @@ export const Receivables: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", `financeiro_${filterDate || 'geral'}.csv`);
+        link.setAttribute("download", `financeiro_${dateFrom}_${dateTo}.csv`);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -99,44 +106,61 @@ export const Receivables: React.FC = () => {
                     <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Fluxo Financeiro</h1>
                     <p className="text-slate-500 mt-1">Acompanhe suas contas a receber e recebimentos.</p>
                 </div>
-                <div className="flex flex-col md:flex-row items-center gap-4">
-                    <button
-                        onClick={handleExportCSV}
-                        className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3 hover:bg-slate-50 transition-colors group"
-                    >
-                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                            <Download size={20} />
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* Quick shortcuts */}
+                    <div className="flex items-center space-x-1">
+                        <Filter size={14} className="text-slate-400 mr-1" />
+                        {[
+                            { label: 'Hoje', from: _today, to: _today },
+                            { label: 'Ontem', from: _yesterday, to: _yesterday },
+                            { label: 'Ontem + Hoje', from: _yesterday, to: _today },
+                            { label: 'Últimos 7 dias', from: _weekAgo, to: _today },
+                            { label: 'Todos', from: '2000-01-01', to: _today },
+                        ].map(({ label, from, to }) => (
+                            <button
+                                key={label}
+                                onClick={() => { setDateFrom(from); setDateTo(to); }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${dateFrom === from && dateTo === to
+                                        ? 'bg-indigo-600 text-white border-indigo-600'
+                                        : 'bg-white text-slate-500 border-slate-200 hover:border-indigo-300'
+                                    }`}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Free date range */}
+                    <div className="flex items-center space-x-2">
+                        <span className="text-xs text-slate-400 font-medium">De</span>
+                        <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                            className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 bg-white" />
+                        <span className="text-xs text-slate-400 font-medium">até</span>
+                        <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                            className="border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 bg-white" />
+                    </div>
+
+                    {/* Received in period */}
+                    <div className="bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
+                        <div className="w-9 h-9 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+                            <ArrowUpRight size={18} />
+                        </div>
+                        <div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Recebido no Período</div>
+                            <div className="text-lg font-black text-slate-900 tracking-tight">R$ {periodBalance.toFixed(2)}</div>
+                        </div>
+                    </div>
+
+                    <button onClick={handleExportCSV}
+                        className="bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-2 hover:bg-slate-50 transition-colors group">
+                        <div className="w-9 h-9 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                            <Download size={18} />
                         </div>
                         <div className="text-left">
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Exportar</div>
+                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Exportar</div>
                             <div className="text-sm font-bold text-slate-900 leading-none">Planilha</div>
                         </div>
                     </button>
-
-                    <div className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
-                            <Calendar size={20} />
-                        </div>
-                        <div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filtrar Data</div>
-                            <input
-                                type="date"
-                                value={filterDate}
-                                onChange={(e) => setFilterDate(e.target.value)}
-                                className="text-sm font-bold text-slate-900 bg-transparent border-none outline-none cursor-pointer"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
-                            <ArrowUpRight size={20} />
-                        </div>
-                        <div>
-                            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Recebido no Dia</div>
-                            <div className="text-xl font-black text-slate-900 tracking-tight">R$ {dailyBalance.toFixed(2)}</div>
-                        </div>
-                    </div>
                 </div>
             </div>
 

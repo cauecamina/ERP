@@ -21,7 +21,7 @@ export class AccountReceivableService {
 
         // Sync with order
         if (receivable.order) {
-            receivable.order.status = "paid";
+            receivable.order.status = "invoiced";
             await AppDataSource.getRepository(Order).save(receivable.order);
         }
 
