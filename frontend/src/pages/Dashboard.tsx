@@ -3,12 +3,20 @@ import { api } from "../services/api";
 import { Layout } from "../components/Layout";
 import { useNavigate, Link } from "react-router-dom";
 import { Users, Box, ShoppingCart } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export const Dashboard: React.FC = () => {
     const navigate = useNavigate();
+    const { signed, loading } = useAuth();
     const [stats, setStats] = useState({ clients: 0, products: 0, orders: 0 });
 
     useEffect(() => {
+        if (loading) return;
+        if (!signed) {
+            navigate("/login");
+            return;
+        }
+
         async function loadStats() {
             try {
                 const [c, p, o] = await Promise.all([
@@ -27,7 +35,7 @@ export const Dashboard: React.FC = () => {
             }
         }
         loadStats();
-    }, []);
+    }, [loading, signed]);
 
     return (
         <Layout>
