@@ -4,6 +4,8 @@
     "main": "dist/server.js",
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+        "build": "tsc",
+        "start": "node dist/server.js",
         "typeorm": "typeorm-ts-node-commonjs",
         "migration:generate": "npm run typeorm migration:generate -- -d src/database/data-source.ts src/database/migrations/InitialMigration",
         "migration:run": "npm run typeorm migration:run -- -d src/database/data-source.ts",
