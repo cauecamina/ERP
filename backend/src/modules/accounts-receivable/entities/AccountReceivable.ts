@@ -23,7 +23,7 @@ export class AccountReceivable {
     @Column({ default: "open" })
     status!: "open" | "paid";
 
-    @Column({ type: "datetime", nullable: true })
+    @Column({ type: "timestamp", nullable: true })
     paid_at!: Date | null;
 
     @CreateDateColumn()

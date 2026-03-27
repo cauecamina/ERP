@@ -7,7 +7,7 @@ Um sistema completo de Mini ERP com arquitetura em camadas, utilizando Node.js/T
 ### Backend
 - Node.js + Express
 - TypeScript
-- TypeORM (MySQL)
+- TypeORM (PostgreSQL)
 - JWT + bcrypt
 - UUID
 
@@ -21,28 +21,29 @@ Um sistema completo de Mini ERP com arquitetura em camadas, utilizando Node.js/T
 
 ### Pré-requisitos
 - Node.js instalado
-- XAMPP (MySQL) rodando
+- Docker e Docker Compose instalados
+- DBeaver (opcional, para visualização do banco de dados)
 
-### 1. Preparar o Banco de Dados
-- Abra o XAMPP e inicie o MySQL.
-- Acesse o `phpMyAdmin` ou utilize um cliente MySQL.
-- Crie um banco de dados chamado `mini_erp`.
+### 1. Preparar o Banco de Dados (PostgreSQL via Docker)
+- Na raiz do projeto, suba o container do banco de dados executando:
+  ```bash
+  docker-compose up -d ou inicializa no docker desktop
+  ```
+  Isso irá baixar e iniciar o `PostgreSQL 15` na porta `5432`. O banco `mini_erp` será criado automaticamente.
 
 ### 2. Configurar o Backend
 - Navegue para a pasta `backend`.
-- O arquivo `.env` já foi criado com as configurações padrão do XAMPP (root sem senha).
+- O arquivo `.env` já está configurado para acessar o PostgreSQL do Docker (usuário `postgres`, senha `rootpassword`, porta `5432`).
 - Instale as dependências:
   ```bash
   npm install --ignore-engines
-  ```
-- Rode as migrations para criar as tabelas:
-  ```bash
-  npm run migration:run
   ```
 - Inicie o servidor:
   ```bash
   npm run dev
   ```
+  *Nota: As tabelas serão criadas e sincronizadas automaticamente pelo TypeORM no momento da inicialização.*
+  
   O servidor rodará em `http://localhost:3000`.
 
 ### 3. Configurar o Frontend

@@ -17,6 +17,9 @@ export const errorMiddleware = (
     res: Response,
     next: NextFunction
 ) => {
+    console.log("=== SERVER ERROR ===");
+    console.log(err);
+    console.log("====================");
     const statusCode = err instanceof CustomError ? err.statusCode : 500;
     const message = err.message || "Internal Server Error";
 
