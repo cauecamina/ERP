@@ -4,7 +4,7 @@ import { Layout } from "../components/Layout";
 import {
     PackagePlus, BarChart3, Search, MoreVertical,
     Package, Edit2, Trash2, X, Info,
-    Truck, Tag, History, FileText, Settings, Save, Download, Upload, FileSpreadsheet
+    Truck, History, FileText, Settings, Save, Download, Upload, FileSpreadsheet
 } from "lucide-react";
 
 export const Products: React.FC = () => {
