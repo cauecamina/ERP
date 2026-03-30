@@ -16,8 +16,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storagedUser = localStorage.getItem("@MiniERP:user");
-        const storagedToken = localStorage.getItem("@MiniERP:token");
+        const storagedUser = localStorage.getItem("@CaueERP:user");
+        const storagedToken = localStorage.getItem("@CaueERP:token");
 
         if (storagedUser && storagedToken) {
             setUser(JSON.parse(storagedUser));
@@ -30,13 +30,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { user, token } = response.data;
 
         setUser(user);
-        localStorage.setItem("@MiniERP:user", JSON.stringify(user));
-        localStorage.setItem("@MiniERP:token", token);
+        localStorage.setItem("@CaueERP:user", JSON.stringify(user));
+        localStorage.setItem("@CaueERP:token", token);
     }
 
     function signOut() {
-        localStorage.removeItem("@MiniERP:token");
-        localStorage.removeItem("@MiniERP:user");
+        localStorage.removeItem("@CaueERP:token");
+        localStorage.removeItem("@CaueERP:user");
         setUser(null);
     }
 

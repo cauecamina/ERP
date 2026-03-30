@@ -33,7 +33,7 @@ export const Login: React.FC = () => {
                         <span className="text-indigo-300">resultados reais.</span>
                     </h1>
                     <p className="text-xl text-indigo-100 max-w-md leading-relaxed">
-                        Controle seus clientes, estoque e financeiro em um só lugar com o MiniERP Pro.
+                        Controle seus clientes, estoque e financeiro em um só lugar com o CaueERP.
                     </p>
                 </div>
 
@@ -89,7 +89,7 @@ export const Login: React.FC = () => {
                     </form>
 
                     <p className="mt-12 text-center text-slate-400 text-xs font-medium uppercase tracking-widest">
-                        powered by <span className="text-slate-900 font-black">MINIERP PRO</span>
+                        powered by <span className="text-slate-900 font-black">CAUE ERP</span>
                     </p>
                 </div>
             </div>

@@ -202,7 +202,7 @@ export const Clients: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", "modelo_clientes_minierp.csv");
+        link.setAttribute("download", "modelo_clientes_caueerp.csv");
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();

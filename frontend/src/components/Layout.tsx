@@ -14,7 +14,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
                         <Box size={24} className="text-white" />
                     </div>
-                    <span className="text-xl font-bold tracking-tight">MiniERP<span className="text-indigo-400">Pro</span></span>
+                    <span className="text-xl font-bold tracking-tight text-white">Caue<span className="text-indigo-400">ERP</span></span>
                 </div>
 
                 <nav className="flex-1 px-6 py-6 space-y-1 overflow-y-auto">
